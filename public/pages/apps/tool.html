@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tool - Core Log</title>
+    <link rel="icon" href="/corelog-logo.png?v=2" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="/corelog-logo.png?v=2" type="image/png">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topbar" data-shared-header data-active-page="tool"></header>
+
+      <section class="calendar-card module-page module-section module-manage-section">
+        <div class="trade-summary-block module-manage">
+          <div class="module-settings-panel">
+            <div class="module-settings-header">
+              <div>
+                <h2>Module settings</h2>
+                <p class="muted">Choose which modules appear in the navigation.</p>
+              </div>
+              <div id="moduleSettingsStatus" class="status" role="status" aria-live="polite"></div>
+            </div>
+            <div class="module-settings-grid">
+              <label class="module-setting-option">
+                <input id="enableTrade" type="checkbox">
+                <span>Trade</span>
+              </label>
+              <label class="module-setting-option">
+                <input id="enableTransaction" type="checkbox">
+                <span>Transaction</span>
+              </label>
+              <label class="module-setting-option">
+                <input id="enableHayday" type="checkbox">
+                <span>Hay Day</span>
+              </label>
+            </div>
+          </div>
+          <div class="trade-panel">
+            <h3>sqlite databases</h3>
+            <div class="form-row">
+              <button id="btnBackupData" class="module-control" type="button">Backup Data</button>
+              <div id="dataBackupStatus" class="status" role="status" aria-live="polite">Loading backup path...</div>
+            </div>
+            <div class="form-row">
+              <button id="btnChooseBackupPath" class="module-control" type="button">Choose Backup Path</button>
+            </div>
+            <p id="backupPathStatus" class="muted">Loading default database path...</p>
+            <div class="form-row">
+              <button id="btnBackupDatabases" class="module-control" type="button">Backup DB</button>
+              <button id="btnPurgeBackups" class="module-control" type="button">Purge Previous Backups</button>
+            <div id="backupStatus" class="status" role="status" aria-live="polite"></div>
+            </div>
+               <p class="muted">Backups are written under each database folder's backup/YYMMDD directory.</p>
+            <div class="form-row">
+              <select id="selToolDatabase" class="module-control" aria-label="Database">
+                <option value="">-- Select database --</option>
+              </select>
+              <select id="selToolTable" class="module-control" aria-label="Table" disabled>
+                <option value="">-- Select table --</option>
+              </select>
+              <div id="toolTableStatus" class="muted"></div>
+            </div>
+            <div id="divToolTable" class="table-container"></div>
+          </div>
+          <div class="trade-panel">
+            <h3>Seed Data</h3>
+            <div class="form-row seed-data-row">
+              <button id="btnSeedQuickLinkIcons" class="module-control" type="button" aria-label="Seed qLink icons" title="Download missing qLink icons using the URLs saved in qLink.">Seed qLink Icons</button>
+              <div id="quickLinkIconSeedStatus" class="status" role="status" aria-live="polite"></div>
+              <button id="btnSeedHaydayIcons" class="module-control" type="button" aria-label="Seed Hay Day icons" title="Search the web by building or product name, then download and save missing Hay Day images.">Seed Hay Day Icons</button>
+              <div id="haydayIconSeedStatus" class="status" role="status" aria-live="polite"></div>
+            </div>
+            <div id="haydayIconSeedFailures" class="status error" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/pages/apps/appCommon/header.js"></script>
+    <script type="module" src="/pages/apps/tool.js"></script>
+  </body>
+</html>

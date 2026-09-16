@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hay Day - Core Log</title>
+    <link rel="icon" href="/corelog-logo.png?v=2" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="/corelog-logo.png?v=2" type="image/png">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topbar" data-shared-header data-active-page="hayday"></header>
+
+      <section class="calendar-card module-page module-section module-manage-section">
+        <div class="trade-summary-block module-manage">
+          <select id="hayday-manage-type" class="module-control" aria-label="Select item to manage">
+            <option value="">-- Select item to manage --</option>
+            <option value="analysis">Analysis</option>
+            <option value="product" selected>Product</option>
+            <option value="summary">Summary</option>
+            <option value="storage">Storage</option>
+          </select>
+
+          <div id="hayday-product-panel" class="trade-panel hidden">
+            <div class="hayday-product-manager">
+              <label class="hayday-manager-label" for="hayday-building-type">Select Building Type: <span id="hayday-building-type-count"></span></label>
+              <div class="hayday-native-select">
+                <select id="hayday-building-type" class="module-control" aria-label="Select building type"></select>
+              </div>
+
+              <div class="hayday-manager-label">Select Building: <span id="hayday-building-count"></span></div>
+              <div class="form-row">
+                <select id="hayday-building" class="module-control" aria-label="Select building"></select>
+                <input id="hayday-building-name" class="module-control" type="text" placeholder="New building name">
+                <input id="hayday-building-level" class="module-control" type="number" min="0" placeholder="Level">
+                <input id="hayday-building-image-url" class="module-control" type="url" placeholder="Image URL (optional)">
+                <select id="hayday-building-edit-type" class="module-control" aria-label="Building type"></select>
+                <button id="hayday-building-save" class="module-control" type="button">Add/Update</button>
+                <button id="hayday-building-delete" class="module-control" type="button">Delete</button>
+              </div>
+
+              <div class="hayday-manager-label">Select a Product: <span id="hayday-product-count"></span></div>
+              <div class="form-row">
+                <select id="hayday-product" class="module-control" aria-label="Select product"></select>
+                <input id="hayday-product-name" class="module-control" type="text" placeholder="New product name">
+                <input id="hayday-product-level" class="module-control" type="number" min="0" placeholder="Level">
+                <input id="hayday-product-minute" class="module-control" type="number" min="0" placeholder="Time">
+                <input id="hayday-product-ratio" class="module-control" type="number" min="0" placeholder="barn to product by 10">
+                <input id="hayday-product-image-url" class="module-control" type="url" placeholder="Image URL (optional)">
+                <select id="hayday-product-building" class="module-control" aria-label="Product building"></select>
+                <button id="hayday-product-save" class="module-control" type="button">Add/Update</button>
+                <button id="hayday-product-delete" class="module-control" type="button">Delete</button>
+              </div>
+
+              <div id="hayday-ingredient-list" class="hayday-ingredient-list" aria-label="Selected product ingredients"></div>
+              <div class="hayday-manager-label">Add Ingredients: <span id="hayday-ingredient-count"></span></div>
+              <div class="form-row">
+                <select id="hayday-ingredient" class="module-control" aria-label="Select ingredient product"></select>
+                <input id="hayday-ingredient-amount" class="module-control" type="number" min="1" placeholder="ingredient count">
+                <button id="hayday-ingredient-add" class="module-control" type="button">Add</button>
+                <select id="hayday-ingredient-building" class="module-control" aria-label="Select building for ingredient"></select>
+                <button id="hayday-ingredient-building-save" class="module-control" type="button">Update Building</button>
+              </div>
+              <span id="hayday-status" class="transaction-staging-status" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div id="hayday-storage-panel" class="trade-panel hidden">
+            <div class="module-panel-label">Storage accounts</div>
+            <div class="form-row">
+              <select id="hayday-account" class="module-control" aria-label="Select storage account"><option value="">-- Select account --</option></select>
+              <input id="hayday-account-name" class="module-control" type="text" placeholder="Account name">
+              <button id="hayday-account-save" class="module-control" type="button">Add/Update</button>
+              <button id="hayday-account-delete" class="module-control" type="button">Delete</button>
+            </div>
+            <span id="hayday-account-status" class="transaction-staging-status" role="status" aria-live="polite"></span>
+            <div id="hayday-account-table" class="table-container trade-table-scroll hayday-account-table-wrap"></div>
+          </div>
+
+          <div id="hayday-analysis-panel" class="trade-panel hidden">
+            <div class="module-panel-label">Analysis</div>
+            <div class="hayday-analysis-grid">
+              <div class="hayday-analysis-row">
+                <label for="hayday-capacity">Kit needed to upgrade 1 level to</label>
+                <select id="hayday-capacity" class="module-control"><option value="">--Select a capacity--</option></select>
+                <span>Kit Needed: <strong id="hayday-kit-number"></strong></span>
+              </div>
+              <div class="hayday-analysis-row">
+                <label for="hayday-capacity-from">Kit needed to upgrade from</label>
+                <select id="hayday-capacity-from" class="module-control"><option value="">--Select a from capacity--</option></select>
+                <span>to</span>
+                <select id="hayday-capacity-to" class="module-control"><option value="">--Select a to capacity--</option></select>
+                <span>Total kits: <strong id="hayday-total-kits"></strong></span>
+              </div>
+              <form id="hayday-exchange-form" class="hayday-exchange-form">
+                <div class="hayday-exchange-title">Exchange Ratio (upgrad barn kit : product)</div>
+                <div class="hayday-analysis-row">
+                  <label for="hayday-ratio-in">Ratio: Barn</label>
+                  <input id="hayday-ratio-in" class="module-control" type="number" min="1" value="10">
+                  <span>:</span>
+                  <select id="hayday-analysis-product" class="module-control"><option value="">--Select a product--</option></select>
+                  <input id="hayday-ratio-out" class="module-control" type="number" min="1" placeholder="product out">
+                </div>
+                <div class="hayday-analysis-row">
+                  <label for="hayday-result-in">Result: Barn</label>
+                  <input id="hayday-result-in" class="module-control" type="number" min="0" placeholder="in">
+                  <span>:</span>
+                  <span id="hayday-selected-product">Selected product</span>
+                  <input id="hayday-result-out" class="module-control" type="number" min="0" placeholder="out">
+                  <button class="module-control" type="submit">Calculate</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div id="hayday-summary-panel" class="trade-panel hidden">
+            <div class="module-panel-label">Summary</div>
+            <div class="form-row">
+              <select id="hayday-summary-request" class="module-control" aria-label="Hay Day summary report">
+                <option value="">-- Select a report --</option>
+              </select>
+              <input id="hayday-summary-param" class="module-control hidden" type="text" placeholder="Search value">
+              <button id="hayday-summary-run" class="module-control" type="button">Show Summary</button>
+              <span id="hayday-summary-count" class="transaction-staging-status"></span>
+            </div>
+            <div id="hayday-summary-table" class="table-container trade-table-scroll"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/pages/apps/appCommon/header.js"></script>
+    <script type="module" src="/pages/apps/hayday.js"></script>
+  </body>
+</html>

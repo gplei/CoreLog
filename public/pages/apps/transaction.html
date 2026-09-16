@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transaction - Core Log</title>
+    <link rel="icon" href="/corelog-logo.png?v=2" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="/corelog-logo.png?v=2" type="image/png">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topbar" data-shared-header data-active-page="transaction"></header>
+
+      <section class="calendar-card module-page module-section module-manage-section">
+        <div class="module-manage">
+          <div class="transaction-manage-selector-row">
+              <select id="selOptType" required class="module-control">
+                <option value="">-- Select item to manage --</option>
+                <option value="Category">Category</option>
+                <option value="Trip">Trip</option>
+                <option value="Source">Account</option>
+                <option value="CSV Mapping">Manage CSV</option>
+              </select>
+            <div id="transactionMessage" class="status"></div>
+          </div>
+
+              <div id="divOptType" class="hidden transaction-manage-panel">
+                <div id="divCatMgr" class="hidden transaction-manage-panel">
+                  <div class="transaction-manage-subtitle">Category manager</div>
+                  <div class="form-row">
+                    <select id="selCategoryMgr" required class="module-control">
+                      <option value="">-- Select category --</option>
+                    </select>
+                    <input id="txtCatMgr" type="text" class="module-control" placeholder="Category">
+                    <button id="btnAddUpdCat" type="button" class="module-control">Add/Update Category</button>
+                  </div>
+                  <div class="form-row">
+                    <select id="selSubcategoryMgr" required class="module-control">
+                      <option value="">-- Select subcategory --</option>
+                    </select>
+                    <input id="txtSubcatMgr" type="text" class="module-control" placeholder="Subcategory">
+                    <button id="btnAddUpdSubcat" type="button" class="module-control">Add/Update Subcategory</button>
+                  </div>
+                  <hr class="transaction-manager-separator">
+                  <div class="transaction-manage-subsection">
+                    <div class="transaction-manage-subtitle">Category Rule</div>
+                    <div class="form-row">
+                      <input id="txtRuleName" type="text" class="module-control" placeholder="Rule name">
+                      <input id="txtRulePattern" type="text" class="module-control" placeholder="Pattern">
+                      <select id="selRuleMatchType" class="module-control">
+                        <option value="contains">contains</option>
+                        <option value="starts_with">starts_with</option>
+                        <option value="equals">equals</option>
+                        <option value="regex">regex</option>
+                      </select>
+                      <select id="selRuleCategory" class="module-control">
+                        <option value="">-- Select category --</option>
+                      </select>
+                      <select id="selRuleSubcategory" class="module-control">
+                        <option value="">-- Select subcategory --</option>
+                      </select>
+                    </div>
+                    <div class="form-row">
+                      <select id="selRuleSource" class="module-control">
+                        <option value="">-- Any account --</option>
+                      </select>
+                      <input id="txtRulePriority" type="number" class="module-control" placeholder="Priority" value="100">
+                      <input id="txtRuleNotes" type="text" class="module-control" placeholder="Notes">
+                      <button id="btnAddUpdRule" type="button" class="module-control">Add/Update Rule</button>
+                      <button id="btnGenerateRules" type="button" class="module-control">Rebuild Rules from Data</button>
+                      <span id="txtRuleStatus" class="transaction-staging-status"></span>
+                    </div>
+                    <div id="divRuleTable" class="table-container transaction-fixed-table"></div>
+                  </div>
+                </div>
+
+                <div id="divTripMgr" class="hidden transaction-manage-panel"></div>
+
+                <div id="divCsvMappingMgr" class="hidden transaction-manage-panel">
+                  <div class="module-workbench-panel transaction-import-panel">
+                    <div class="module-panel-label">CSV mapping</div>
+                    <div class="csv-staging-columns-header">
+                      <span class="module-panel-label">Select staging columns to be mapped</span>
+                      <button id="btnAddCitiStagingColumn" type="button" class="module-control csv-add-button" aria-label="Add staging column">+</button>
+                      <button id="btnRemoveCitiStagingColumn" type="button" class="module-control csv-remove-button" aria-label="Remove last staging column">−</button>
+                      <button id="btnSaveCitiStagingColumns" type="button" class="module-control csv-save-columns-button">Save staging columns</button>
+                      <span id="citiStagingColumnStatus" class="transaction-staging-status" role="status" aria-live="polite"></span>
+                      <div id="citiStagingColumnRows" class="csv-staging-column-rows"></div>
+                    </div>
+                    <hr class="csv-mapping-divider">
+                    <div class="transaction-import-controls">
+                      <select id="selCitiSource" class="module-control" aria-label="Transaction account">
+                        <option value="">-- Select account --</option>
+                      </select>
+                      <button id="btnChooseCitiFile" type="button" class="module-control">Choose CSV</button>
+                      <span id="citiFileName" class="muted">No file selected</span>
+                      <span id="citiImportStatus" class="transaction-staging-status" role="status" aria-live="polite"></span>
+                    </div>
+                    <div id="citiMappingPanel" class="csv-mapping-panel">
+                      <div class="csv-map-instruction">Map CSV header to STG header</div>
+                      <div class="csv-mapping-header">
+                        <span>Staging column</span>
+                        <span>CSV header</span>
+                        <span>Rule builder</span>
+                      </div>
+                      <div id="citiMappingRows" class="csv-mapping-rows"></div>
+                      <div class="transaction-import-actions">
+                        <button id="btnPreviewCitiMapping" type="button" class="module-control">Preview Mapping</button>
+                        <button id="btnSaveCitiMapping" type="button" class="module-control">Save Mapping</button>
+                        <span id="citiMappingStatus" class="transaction-staging-status" role="status" aria-live="polite"></span>
+                      </div>
+                      <pre id="citiMappingPreview" class="csv-mapping-preview" aria-label="Mapping JSON preview"></pre>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="divSourceMgr" class="hidden transaction-manage-panel">
+                    <div class="transaction-manage-subtitle">Upload CSV</div>
+                  <div class="transaction-note">
+                    <p><span class="transaction-note-label">1.</span><span class="transaction-note-text">choose multiple CSV files</span></p>
+                    <p><span class="transaction-note-label">2.</span><span class="transaction-note-text">assign an account to each file in the queue</span></p>
+                    <p><span class="transaction-note-label">3.</span><span class="transaction-note-text">click Stage to load every file using its account staging_params</span></p>
+                    <p><span class="transaction-note-label">4.</span><span class="transaction-note-text">check whether transactions on or after the last transaction date are duplicates</span></p>
+                    <p><span class="transaction-note-label">5.</span><span class="transaction-note-text">switch the table view between matching last_txn_date rows and all rows</span></p>
+                    <p><span class="transaction-note-label">6.</span><span class="transaction-note-text">staging table shows context of last_txn_date; mark duplicates as no_import if needed</span></p>
+                    <p><span class="transaction-note-label">7.</span><span class="transaction-note-text">click Purge to remove rows older than account last_txn_date and all no_import rows</span></p>
+                    <p><span class="transaction-note-label">8.</span><span class="transaction-note-text">click Merge to merge the staged rows into transactions</span></p>
+                    <p><span class="transaction-note-label">9.</span><span class="transaction-note-text">Both last_txn_date and last_merge_date are updated after each merge</span></p>
+                  </div>
+                  <div id="divStagingControls" class="transaction-staging-controls">
+                    <button id="btnChooseStagingFile" type="button" class="module-control">Choose CSV Files</button>
+                    <span id="txtStagingStatus" class="transaction-staging-status"></span>
+                  </div>
+                  <div id="divStagingQueue" class="transaction-staging-queue"></div>
+                  <div id="divStagingActions" class="transaction-staging-actions">
+                    <span class="transaction-staging-action-group">
+                      <button id="btnStaging" type="button" class="module-control">Stage</button>
+                    </span>
+                    <span class="transaction-staging-action-group">
+                      <button id="btnPurge" type="button" class="module-control">Purge</button>
+                    </span>
+                    <span class="transaction-staging-action-group">
+                      <button id="btnApplyRules" type="button" class="module-control">Apply Rules</button>
+                    </span>
+                    <span class="transaction-staging-action-group">
+                      <button id="btnMerge" type="button" class="module-control">Merge</button>
+                    </span>
+                    <span id="stagingActionStatus" class="transaction-staging-action-status" role="status" aria-live="polite"></span>
+                  </div>
+                  <div id="divStagingSummary" class="transaction-staging-summary">
+                    <div id="divStagingViewMode" class="transaction-staging-view" aria-label="Staging table view">
+                      <label class="transaction-staging-view-option">
+                        <input type="radio" name="stagingViewMode" value="matched" checked>
+                        Matching last transaction date
+                      </label>
+                      <label class="transaction-staging-view-option">
+                        <input type="radio" name="stagingViewMode" value="all">
+                        All rows
+                      </label>
+                    </div>
+                    <span id="txtStagingTotal"></span>
+                  </div>
+                  <div id="divStagingTable" class="table-container"></div>
+                </div>
+              </div>
+        </div>
+      </section>
+
+      <section class="calendar-card module-page module-section module-data-section">
+        <div class="module-workbench">
+          <div id="divFilter" class="module-workbench-panel">
+            <div class="module-panel-label transaction-filter-header">
+              <span>Filter:</span>
+              <span id="txtFilterDesc" class="transaction-filter-desc">No filter</span>
+              <button id="btnClearFilters" type="button" class="module-control">Clear</button>
+            </div>
+            <div class="form-row transaction-filter-row">
+              <select id="selPeriod" class="module-control">
+                <option value="">-- Select period --</option>
+              </select>
+              <select id="selTrip" class="module-control">
+                <option value="">-- Select trip --</option>
+              </select>
+              <select id="selType" class="module-control">
+                <option value="">-- Select type --</option>
+              </select>
+              <select id="selSource" class="module-control">
+                <option value="">-- Select account --</option>
+              </select>
+              <select id="selCategory" class="module-control">
+                <option value="">-- Select category --</option>
+              </select>
+              <select id="selSubcategory" class="module-control">
+                <option value="">-- Select subcategory --</option>
+              </select>
+              <input id="txtDesc" type="text" class="module-control" placeholder="type description to filter">
+              <div id="divTransactionViewMode" class="transaction-staging-view" aria-label="Transaction view">
+                <label class="transaction-staging-view-option">
+                  <input type="radio" name="transactionViewMode" value="detail" checked>
+                  Detail
+                </label>
+                <label class="transaction-staging-view-option">
+                  <input type="radio" name="transactionViewMode" value="summary">
+                  Summary
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="divTransaction" class="transaction-results container"></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/pages/apps/appCommon/header.js"></script>
+    <script type="module" src="/pages/apps/transaction.js"></script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "memory-journal",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/server.js",
+  "scripts": {
+    "setup": "tsx src/scripts/setup.ts",
+    "dev": "PORT=3002 NODE_ENV=development tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "PORT=3001 NODE_ENV=production node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "sharp": "^0.32.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^20.3.1",
+    "tsx": "^4.22.4",
+    "typescript": "^5.1.6"
+  }
+}

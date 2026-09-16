@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trade - Core Log</title>
+    <link rel="icon" href="/corelog-logo.png?v=2" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="/corelog-logo.png?v=2" type="image/png">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topbar" data-shared-header data-active-page="trade"></header>
+
+      <section class="calendar-card module-page module-section module-manage-section">
+        <div class="trade-summary-block module-manage">
+          <select id="selManageType" class="module-control">
+            <option value="">-- Select item to manage --</option>
+            <option value="Institution">Institution</option>
+            <option value="Account">Account</option>
+            <option value="Symbol">Symbol</option>
+            <option value="TradeType">Trade Type</option>
+            <option value="Trade">Trade</option>
+            <option value="CSV Mapping">Manage CSV</option>
+          </select>
+
+          <div id="divTradeCsvMappingMgr" class="hidden trade-panel">
+            <div class="module-workbench-panel transaction-import-panel">
+              <div class="module-panel-label">CSV mapping</div>
+              <div class="csv-staging-columns-header">
+                <span class="module-panel-label">Select staging columns to be mapped</span>
+                <button id="btnAddTradeStagingColumn" type="button" class="module-control csv-add-button" aria-label="Add staging column">+</button>
+                <button id="btnRemoveTradeStagingColumn" type="button" class="module-control csv-remove-button" aria-label="Remove last staging column">−</button>
+                <button id="btnSaveTradeStagingColumns" type="button" class="module-control csv-save-columns-button">Save staging columns</button>
+                <span id="tradeStagingColumnStatus" class="transaction-staging-status" role="status" aria-live="polite"></span>
+                <div id="tradeStagingColumnRows" class="csv-staging-column-rows"></div>
+              </div>
+              <hr class="csv-mapping-divider">
+              <div class="transaction-import-controls">
+                <div class="csv-map-instruction">Map CSV header to STG header</div>
+                <select id="selTradeCsvAccount" class="module-control" aria-label="Trade account">
+                  <option value="">-- Select account --</option>
+                </select>
+                <button id="btnChooseTradeMappingFile" type="button" class="module-control">Choose CSV</button>
+                <span id="tradeMappingFileName" class="muted">No file selected</span>
+                <span id="tradeMappingStatus" class="transaction-staging-status" role="status" aria-live="polite"></span>
+              </div>
+              <div id="tradeMappingPanel" class="csv-mapping-panel">
+                <div class="csv-mapping-header">
+                  <span>Staging column</span>
+                  <span>CSV header</span>
+                  <span>Rule builder</span>
+                </div>
+                <div id="tradeMappingRows" class="csv-mapping-rows"></div>
+                <div class="transaction-import-actions">
+                  <button id="btnPreviewTradeMapping" type="button" class="module-control">Preview Mapping</button>
+                  <button id="btnSaveTradeMapping" type="button" class="module-control">Save Mapping</button>
+                  <span id="tradeMappingSaveStatus" class="transaction-staging-status" role="status" aria-live="polite"></span>
+                </div>
+                <pre id="tradeMappingPreview" class="csv-mapping-preview" aria-label="Trade mapping JSON preview"></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="divInstitutionMgr" class="hidden trade-panel">
+            <div class="form-row">
+              <input type="text" id="txtInstitutionName" class="module-control" placeholder="Institution name">
+              <select id="selInstitutionType" class="module-control">
+                <option value="">-- Select Type --</option>
+              </select>
+              <button id="btnSaveInstitution" class="module-control" type="button">Add Institution</button>
+            </div>
+            <span id="institutionMgrMessage" class="lightLabel"></span>
+            <div id="divInstitutionList" class="table-container"></div>
+          </div>
+
+          <div id="divAccountManager" class="hidden trade-panel">
+            <div class="form-row">
+              <select id="selInstituteMgr" class="module-control">
+                <option value="">-- Select Institution --</option>
+              </select>
+              <input type="text" id="txtAccountMgr" class="module-control" placeholder="Account name">
+              <button id="btnSaveAccount" class="module-control" type="button">Add Account</button>
+            </div>
+            <span id="accountMgrMessage" class="lightLabel"></span>
+            <div id="divAccount" class="table-container"></div>
+            <div class="trade-import-section">
+              <div class="transaction-manage-subtitle">Upload CSV</div>
+              <div class="transaction-note">
+                <p><span class="transaction-note-label">1.</span><span class="transaction-note-text">choose multiple CSV files</span></p>
+                <p><span class="transaction-note-label">2.</span><span class="transaction-note-text">assign an account to each file in the queue</span></p>
+                <p><span class="transaction-note-label">3.</span><span class="transaction-note-text">click Stage to load every file using its account staging_params</span></p>
+                <p><span class="transaction-note-label">4.</span><span class="transaction-note-text">review staged trades and mark duplicates as no_import if needed</span></p>
+                <p><span class="transaction-note-label">5.</span><span class="transaction-note-text">click Purge to remove excluded staged trades</span></p>
+                <p><span class="transaction-note-label">6.</span><span class="transaction-note-text">click Merge to merge approved staged trades into trd_log</span></p>
+              </div>
+              <div class="transaction-staging-controls">
+                <button id="btnChooseTradeFiles" class="module-control" type="button">Choose CSV Files</button>
+                <button id="btnPreloadTradeSymbols" class="module-control" type="button" title="Scan selected CSV files and add missing symbols to the symbol table. This does not stage trades." aria-label="Preload symbols from selected CSV files">Preload Symbols</button>
+                <span id="tradeImportStatus" class="transaction-staging-status"></span>
+              </div>
+              <div id="divTradeUploadQueue" class="transaction-staging-queue"></div>
+              <div class="transaction-staging-actions">
+                <span class="transaction-staging-action-group">
+                  <button id="btnStageTrades" class="module-control" type="button">Stage</button>
+                </span>
+                <span class="transaction-staging-action-group">
+                  <button id="btnPurgeStagedTrades" class="module-control" type="button">Purge</button>
+                </span>
+                <span class="transaction-staging-action-group">
+                  <button id="btnMergeStagedTrades" class="module-control" type="button">Merge</button>
+                </span>
+              </div>
+              <div class="transaction-staging-summary">
+                <div id="divTradeStagingViewMode" class="transaction-staging-view" aria-label="Trade staging table view">
+                  <label class="transaction-staging-view-option">
+                    <input type="radio" name="tradeStagingViewMode" value="matched" checked>
+                    Matching last trade date
+                  </label>
+                  <label class="transaction-staging-view-option">
+                    <input type="radio" name="tradeStagingViewMode" value="all">
+                    All rows
+                  </label>
+                </div>
+                <span id="txtTradeStagingTotal"></span>
+              </div>
+              <div id="divTradeStaging" class="table-container trade-table-scroll"></div>
+            </div>
+            <h3>Account Balance</h3>
+            <div class="form-row">
+              <button id="btnAddBalance" class="module-control" type="button">Add Balance</button>
+              <input type="date" id="dtBalence" class="module-control">
+            </div>
+            <div id="divAccountBalance" class="table-container"></div>
+          </div>
+
+          <div id="divSymbolMgr" class="hidden trade-panel">
+            <div class="form-row">
+              <input type="text" id="txtSymbolCode" class="module-control" placeholder="Symbol Code">
+              <input type="text" id="txtCompanyName" class="module-control" placeholder="Company Name">
+              <select id="selAssetTypeMgr" class="module-control">
+                <option value="">-- Select Asset Type --</option>
+              </select>
+              <button id="btnAddSymbol" class="module-control" type="button">Add Symbol</button>
+            </div>
+            <div class="trade-table-status"><span id="txtSymbolCount"></span></div>
+            <div id="divSymbol" class="table-container trade-table-scroll"></div>
+          </div>
+
+          <div id="divTradeTypeMgr" class="hidden trade-panel">
+            <div class="form-row">
+              <input type="text" id="txtTradeTypeName" class="module-control" placeholder="Type name">
+              <input type="text" id="txtTradeTypeDisplayName" class="module-control" placeholder="Display name">
+              <input type="number" id="txtTradeTypeSortOrder" class="module-control" placeholder="Sort order" value="100">
+              <select id="selTradeTypeActive" class="module-control">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+              <button id="btnAddTradeType" class="module-control" type="button">Add Trade Type</button>
+            </div>
+            <span id="tradeTypeMgrMessage" class="lightLabel"></span>
+            <div id="divTradeType" class="table-container trade-table-scroll"></div>
+          </div>
+
+          <div id="divTradeMgr" class="hidden trade-panel">
+            <div class="form-row">
+              <select id="selTradeInstitute" class="module-control">
+                <option value="">-- Select institution --</option>
+              </select>
+              <select id="selTradeAccount" class="module-control">
+                <option value="">-- Select account --</option>
+              </select>
+              <select id="selTradeSymbol" class="module-control">
+                <option value="">-- Select symbol --</option>
+              </select>
+            </div>
+            <div id="divAddTradeForm" class="hidden form-row">
+              <input type="date" id="dtTrade" class="module-control">
+              <select id="selTradeType" class="module-control">
+                <option value="BUY">BUY</option>
+                <option value="SELL">SELL</option>
+              </select>
+              <input type="text" id="txtShare" class="module-control" placeholder="Share">
+              <input type="text" id="txtPrice" class="module-control" placeholder="Price">
+              <button id="btnAddTrade" class="module-control" type="button">Add Trade</button>
+            </div>
+            <div id="divTradeMatch" class="hidden">
+              <label for="selSellTrade">Allocate SELL trade to buy lots:</label>
+              <select id="selSellTrade" class="module-control">
+                <option value="">-- Select existing SELL trade --</option>
+              </select>
+              <span id="spanSellRemaining" class="lightLabel"></span>
+              <div id="divBuyLots" class="table-container"></div>
+            </div>
+            <div id="allTrade" class="table-container trade-table-scroll"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="calendar-card module-page module-section module-data-section">
+        <div class="module-workbench">
+          <div class="module-workbench-panel">
+            <div class="module-panel-label trade-filter-header">
+              <span>Filter:</span>
+              <span id="txtTradeFilterDesc" class="transaction-filter-desc">No filter</span>
+              <button id="btnClearTradeFilters" type="button" class="module-control">Clear</button>
+            </div>
+            <div class="trade-summary-controls">
+              <select id="selInstitute" class="module-control">
+                <option value="">-- Select institution --</option>
+              </select>
+              <select id="selAccount" class="module-control">
+                <option value="">-- Select account --</option>
+              </select>
+              <span class="lightLabel"> | </span>
+              <select id="selAssetType" class="module-control" required>
+                <option value="">-- Select type --</option>
+              </select>
+              <select id="selSymbol" class="module-control" required>
+                <option value="">-- Select symbol --</option>
+              </select>
+              <span id="divSymbolUpdateControls" class="trade-symbol-update-controls hidden">
+                <input type="text" id="txtCurrPrice" class="module-control" placeholder="current price">
+                <button id="btnUsePrice" class="module-control" type="button">Update Price</button>
+                <input type="text" id="txtSplitRatio" class="module-control" placeholder="split ratio (1:2 or 10:1)">
+                <button id="btnSplit" class="module-control" type="button">Split</button>
+              </span>
+              <a class="app-link" id="yLink" target="_blank" rel="noreferrer"></a>
+              <div id="divTradeViewMode" class="transaction-staging-view" aria-label="Trade view">
+                <label class="transaction-staging-view-option">
+                  <input type="radio" name="tradeViewMode" value="summary" checked>
+                  Summary
+                </label>
+                <label class="transaction-staging-view-option">
+                  <input type="radio" name="tradeViewMode" value="detail">
+                  Detail
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="dataStatus" class="status" role="status" aria-live="polite"></div>
+        <button id="btnUpdPrices" class="module-control hidden" type="button">Fetch All Prices</button>
+        <div id="divStockSummary" class="table-container">
+          <div id="divTradeSummaryMethod" class="transaction-staging-view hidden" aria-label="Summary calculation method">
+            <label class="transaction-staging-view-option">
+              <input type="radio" name="tradeSummaryMethod" value="fifo" checked>
+              FIFO
+            </label>
+            <label class="transaction-staging-view-option">
+              <input type="radio" name="tradeSummaryMethod" value="allocated">
+              Allocated lots
+            </label>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/pages/apps/appCommon/header.js"></script>
+    <script type="module" src="/pages/apps/trade.js"></script>
+  </body>
+</html>

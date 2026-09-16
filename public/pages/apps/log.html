@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log - Core Log</title>
+    <link rel="icon" href="/corelog-logo.png?v=2" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="/corelog-logo.png?v=2" type="image/png">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell log-page">
+      <header class="topbar" data-shared-header data-active-page="log"></header>
+
+      <div class="layout-grid">
+        <aside id="calendar-panel" class="calendar-panel">
+          <section class="calendar-card">
+            <div class="calendar-heading">
+              <div class="calendar-heading-bottom">
+                <select id="calendar-year" aria-label="Calendar year"></select>
+                <button id="previous-month" class="icon-button" type="button" aria-label="Previous month">&#8249;</button>
+                <select id="calendar-month" aria-label="Calendar month"></select>
+                <button id="next-month" class="icon-button" type="button" aria-label="Next month">&#8250;</button>
+              </div>
+            </div>
+
+            <div class="weekday-row" aria-hidden="true">
+              <span>Su</span>
+              <span>Mo</span>
+              <span>Tu</span>
+              <span>We</span>
+              <span>Th</span>
+              <span>Fr</span>
+              <span>Sa</span>
+            </div>
+            <div id="calendar-days" class="calendar-days"></div>
+
+          </section>
+
+          <section id="account-groups-panel" class="calendar-links-card">
+            <div class="calendar-links-heading">
+              <button id="toggle-account-groups" class="link-button group-toggle-button" type="button" aria-expanded="false" aria-label="Expand qLinks" title="Expand qLinks">&gt;</button>
+              <span class="quick-links-title">qLinks</span>
+              <button id="add-quick-link" class="link-button quick-links-add-button" type="button" aria-label="Add qLink" title="Add qLink">+</button>
+            </div>
+            <div id="account-groups" class="account-groups"></div>
+          </section>
+        </aside>
+
+        <section class="entry-area">
+          <div class="entry-toolbar">
+            <div class="tag-search-wrap">
+              <input id="tag-filter" class="tag-search" placeholder="Search tags, or description" autocomplete="off">
+              <div id="tag-suggestions" class="suggestions" hidden></div>
+            </div>
+            <div class="entry-toolbar-actions">
+              <div class="entry-toolbar-filter-controls">
+                <div class="filter-button-group">
+                  <button id="toggle-pin-filter" class="button secondary pin-filter-button" type="button" aria-pressed="false">Pinned</button>
+                  <button id="toggle-untagged-filter" class="button secondary pin-filter-button" type="button" aria-pressed="false">Untagged</button>
+                  <button id="toggle-trash" class="button secondary pin-filter-button" type="button" aria-pressed="false">Trash</button>
+                </div>
+                <div id="active-filter" class="active-filter" hidden></div>
+              </div>
+              <div class="entry-section-actions">
+                <button id="new-entry" class="button" type="button">New Entry</button>
+                <button id="empty-trash" class="button danger" type="button" hidden>Empty Trash</button>
+              </div>
+            </div>
+          </div>
+          <div id="status" class="status"></div>
+
+          <div id="entries" class="entries"></div>
+          <div id="entries-sentinel" class="entries-sentinel" aria-hidden="true"></div>
+        </section>
+      </div>
+    </main>
+
+    <section id="quick-link-backdrop" class="dialog-backdrop" aria-modal="true" role="dialog">
+      <article class="dialog compact-dialog">
+        <div class="dialog-header">
+          <h2 id="quick-link-dialog-title">Add qLink</h2>
+          <button id="close-quick-link" class="button secondary" type="button">Cancel</button>
+        </div>
+        <form id="quick-link-form" class="entry-form">
+          <label class="field">
+            <span>Name</span>
+            <input id="quick-link-name" name="name" required autocomplete="off">
+          </label>
+          <label class="field">
+            <span>URL</span>
+            <input id="quick-link-url" name="url" type="url" required placeholder="https://example.com">
+          </label>
+          <label class="field">
+            <span>Tip</span>
+            <input id="quick-link-tip" name="tip" placeholder="Optional hover tip" autocomplete="off">
+          </label>
+          <div class="quick-link-group-row">
+            <select id="quick-link-group" aria-label="Select group">
+              <option value="">-- select group --</option>
+            </select>
+            <input id="quick-link-new-group" placeholder="New group (optional)" autocomplete="off">
+          </div>
+          <div class="actions">
+            <button id="save-quick-link" class="button" type="submit">Save</button>
+            <button id="delete-quick-link" class="button danger" type="button" hidden>Delete</button>
+          </div>
+        </form>
+      </article>
+    </section>
+
+    <section id="entry-backdrop" class="dialog-backdrop" aria-modal="true" role="dialog">
+      <article class="dialog compact-dialog">
+        <div class="dialog-header">
+          <h2 id="entry-modal-title">New Entry</h2>
+          <button id="close-entry" class="button secondary" type="button">Cancel</button>
+        </div>
+        <form id="entry-form" class="entry-form">
+          <label class="field">
+            <span>Entry</span>
+            <textarea id="entry-raw-text" name="raw_text" required></textarea>
+          </label>
+          <div class="field-row">
+            <label class="field field-half">
+              <span>Date</span>
+              <input id="entry-date" name="entry_date" type="date" required>
+            </label>
+            <label class="field field-half">
+              <span>Tags</span>
+              <input id="entry-tags" name="tags" placeholder="family, travel" autocomplete="off">
+            </label>
+          </div>
+          <div id="entry-tag-suggestions" class="chip-row"></div>
+          <div class="actions">
+            <button id="entry-submit" class="button" type="submit">Submit</button>
+          </div>
+        </form>
+      </article>
+    </section>
+
+    <section id="detail-backdrop" class="dialog-backdrop" aria-modal="true" role="dialog">
+      <article class="dialog">
+        <div class="dialog-header">
+          <div>
+            <h2>Core Log</h2>
+            <time id="detail-date" class="muted"></time>
+          </div>
+          <div class="dialog-actions">
+            <button id="open-edit" class="button" type="button">Edit</button>
+            <button id="toggle-pin" class="button secondary" type="button" aria-pressed="false">Pin</button>
+            <button id="delete-entry" class="button danger" type="button">Delete</button>
+            <button id="close-detail" class="button secondary" type="button">Close</button>
+          </div>
+        </div>
+        <div id="detail-content"></div>
+      </article>
+    </section>
+
+    <section id="image-backdrop" class="dialog-backdrop" aria-modal="true" role="dialog">
+      <article class="dialog compact-dialog image-dialog">
+        <div class="dialog-header">
+          <h2>Pick/Upload Images</h2>
+          <button id="image-cancel" class="button secondary" type="button">Cancel</button>
+        </div>
+        <div class="photo-source-wrap">
+          <input id="entry-media-files" name="photos" type="file" accept=".jpg,.jpeg,.png,.gif,.webp,.avif,.bmp,.tif,.tiff,image/*" multiple>
+          <input id="entry-media-items" name="media_items" type="hidden" value="[]">
+          <div class="selected-photo-section">
+            <div id="entry-photo-selection" class="selected-photo-grid"></div>
+          </div>
+        </div>
+        <div class="actions image-dialog-actions">
+          <button id="image-pick" class="button" type="button">Pick</button>
+          <button id="image-upload" class="button" type="button">Upload</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="gallery-backdrop" class="dialog-backdrop gallery-backdrop" aria-modal="true" role="dialog">
+      <article class="dialog gallery-dialog">
+        <div class="dialog-header">
+          <div>
+            <h2 id="gallery-title">Photos</h2>
+            <time id="gallery-date" class="muted"></time>
+          </div>
+          <div class="dialog-actions">
+            <span id="gallery-counter" class="gallery-counter muted"></span>
+            <button id="gallery-prev" class="button secondary" type="button">Prev</button>
+            <button id="gallery-next" class="button secondary" type="button">Next</button>
+            <button id="close-gallery" class="button secondary" type="button">Close</button>
+          </div>
+        </div>
+        <div class="gallery-viewer">
+          <button id="gallery-prev-image" class="gallery-nav" type="button" aria-label="Previous image">&#8249;</button>
+          <figure class="gallery-main">
+            <img id="gallery-image" alt="">
+          </figure>
+          <button id="gallery-next-image" class="gallery-nav" type="button" aria-label="Next image">&#8250;</button>
+        </div>
+        <div id="gallery-thumbs" class="gallery-thumbs"></div>
+      </article>
+    </section>
+
+    <script type="module" src="/pages/apps/appCommon/header.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
