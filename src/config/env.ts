@@ -87,6 +87,7 @@ function resolveFaviconDirectory() {
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: readNumber('PORT', 3002),
+  host: process.env.HOST?.trim() || '0.0.0.0',
   dataRoot: resolveDataRoot(),
   backupRoot: resolveBackupRoot(),
   sqlite: {

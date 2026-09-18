@@ -638,7 +638,7 @@ export async function permanentlyDeleteJournalEntries(ids: number[]) {
   return remove();
 }
 
-export async function getTags(search?: string | null) {
+export async function getTags(search?: string | null, limit = 20) {
   const query = search?.trim();
   if (!query) {
     return [];
@@ -649,8 +649,8 @@ export async function getTags(search?: string | null) {
      from tag
      where name like ?
      order by name asc
-     limit 20`,
-    [`%${query}%`],
+    limit ?`,
+      [`%${query}%`, Math.min(Math.max(limit, 1), 100)],
   );
 
   return rows.map((row) => String(row.name));

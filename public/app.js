@@ -54,6 +54,7 @@ const state = {
   draggingQuickLinkIndex: null,
   activeQuickLinkTooltip: null,
   detailDeletingPhotoId: null,
+  tagSuggestionRequestId: 0,
 };
 
 const elements = {
@@ -1112,9 +1113,22 @@ function replaceCurrentTag(value, suggestion, appendComma = false) {
   return appendComma ? `${nextTags}, ` : nextTags;
 }
 
+function formatEntryTags(tags) {
+  const normalizedTags = tags.map((tag) => tag.trim()).filter(Boolean);
+  return normalizedTags.length > 0 ? `${normalizedTags.join(', ')}, ` : '';
+}
+
 async function renderInlineTagSuggestions(input, container, appendComma = false) {
   const query = currentTagQuery(input.value);
+  const requestId = ++state.tagSuggestionRequestId;
+
+  if (!query) {
+    container.innerHTML = '';
+    return;
+  }
+
   const suggestions = await fetchTagSuggestions(query);
+  if (requestId !== state.tagSuggestionRequestId || currentTagQuery(input.value) !== query) return;
 
   container.innerHTML = suggestions
     .map((suggestion) => `<button class="chip" type="button" data-suggestion="${escapeHtml(suggestion)}">${escapeHtml(suggestion)}</button>`)
@@ -1122,7 +1136,9 @@ async function renderInlineTagSuggestions(input, container, appendComma = false)
 
   container.querySelectorAll('[data-suggestion]').forEach((button) => {
     button.addEventListener('click', () => {
-      input.value = replaceCurrentTag(input.value, button.dataset.suggestion, appendComma);
+      input.value = input === elements.entryTagInput
+        ? replaceCurrentTag(input.value, button.dataset.suggestion, true)
+        : replaceCurrentTag(input.value, button.dataset.suggestion, appendComma);
       container.innerHTML = '';
       input.focus();
     });
@@ -1592,7 +1608,7 @@ function openEdit() {
   state.entryFormEntryId = entry.id;
   elements.entryText.value = entry.raw_text;
   const entryTags = (entry.tags || []).map((tag) => tag.name);
-  elements.entryTagInput.value = entryTags.length > 0 ? `${entryTags.join(', ')}, ` : '';
+  elements.entryTagInput.value = formatEntryTags(entryTags);
   elements.entryDateInput.value = entry.entry_date;
   closeDialog(elements.detailBackdrop);
   openDialog(elements.entryBackdrop);
@@ -1883,6 +1899,16 @@ function initializeEvents() {
       elements.entryTagSuggestions,
       state.entryFormMode === 'edit',
     );
+  });
+  elements.entryTagInput.addEventListener('keydown', (event) => {
+    if (state.entryFormMode !== 'edit' || event.key !== ',') return;
+
+    event.preventDefault();
+    const value = elements.entryTagInput.value;
+    elements.entryTagInput.value = /,\s*$/.test(value)
+      ? `${value.replace(/,\s*$/, '')}, `
+      : `${value.trimEnd()}, `;
+    state.entryFormDirty = true;
   });
   elements.entryMediaFiles.addEventListener('change', async (event) => {
     const files = Array.from(event.target.files || []);

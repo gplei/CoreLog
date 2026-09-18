@@ -3,8 +3,8 @@ import { env } from './config/env';
 import { closePool } from './db/pool';
 
 const app = createApp();
-const server = app.listen(env.port, () => {
-  console.log(`Core Log API listening on port ${env.port}`);
+const server = app.listen(env.port, env.host, () => {
+  console.log(`Core Log API listening on ${env.host}:${env.port}`);
   console.log(`🚀 Server running on http://localhost:${env.port}`);
 });
 
