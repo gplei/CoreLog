@@ -119,7 +119,7 @@ src/
   server/apps/trade/                  Trade API, database, and quote logic
   server/apps/transaction/            Transaction API, staging, rules, and merge logic
   scripts/                            Database migration and import utilities
-public/
+web/public/
   index.html                          Application landing page
   pages/apps/log.html                 Journal UI
   pages/apps/trade.html               Trading UI

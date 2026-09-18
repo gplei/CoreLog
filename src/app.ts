@@ -12,7 +12,7 @@ import { ensurePhotoThumbnail } from './services/photoStorage';
 import { FAVORITE_DIRECTORY, THUMBNAIL_DIRECTORY } from './utils/uploads';
 import { errorHandler, notFoundHandler } from './utils/http';
 
-const publicDirectory = path.join(process.cwd(), 'public');
+const publicDirectory = path.join(process.cwd(), 'web', 'public');
 
 export function createApp() {
   const app = express();
