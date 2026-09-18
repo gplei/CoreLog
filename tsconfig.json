@@ -13,13 +13,13 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "baseUrl": ".",
-    "rootDir": "src",
+    "rootDir": "server",
     "outDir": "dist",
     "resolveJsonModule": true,
     "sourceMap": true
   },
   "include": [
-    "src/**/*.ts"
+    "server/**/*.ts"
   ],
   "exclude": [
     "node_modules",

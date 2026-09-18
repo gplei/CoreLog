@@ -108,7 +108,7 @@ Category rules are prioritized by descending priority and apply only to uncatego
 ## Project structure
 
 ```text
-src/
+server/
   app.ts                              Express app and route registration
   server.ts                           HTTP server bootstrap and shutdown
   config/env.ts                       Environment and database paths

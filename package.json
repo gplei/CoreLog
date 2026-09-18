@@ -4,8 +4,8 @@
   "private": true,
   "main": "dist/server.js",
   "scripts": {
-    "setup": "tsx src/scripts/setup.ts",
-    "dev": "PORT=3002 NODE_ENV=development tsx watch src/server.ts",
+    "setup": "tsx server/scripts/setup.ts",
+    "dev": "PORT=3002 NODE_ENV=development tsx watch server/server.ts",
     "build": "tsc",
     "start": "PORT=3001 NODE_ENV=production node dist/server.js",
     "typecheck": "tsc --noEmit"
