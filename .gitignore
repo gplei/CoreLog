@@ -5,7 +5,6 @@
 .env
 .env.local
 .env.*.local
-data/
 note.md
 data/
 dist/
