@@ -37,6 +37,27 @@
               </label>
             </div>
           </div>
+          <div class="module-settings-panel">
+            <div class="module-settings-header">
+              <div>
+                <h2>Appearance</h2>
+                <p class="muted">Choose the night-time color palette used across Core Log.</p>
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="themeSelect">Night theme</label>
+              <select id="themeSelect" class="module-control" aria-label="Night theme">
+                <option value="rose-gold">Rose &amp; gold</option>
+                <option value="sage-gold">Sage &amp; gold</option>
+                <option value="denim-rose">Denim &amp; rose</option>
+              </select>
+              <label class="module-setting-option" for="themeUseNow">
+                <input id="themeUseNow" type="checkbox">
+                <span>Use selected theme now</span>
+              </label>
+              <span id="themeStatus" class="status" role="status" aria-live="polite"></span>
+            </div>
+          </div>
           <div class="trade-panel">
             <h3>sqlite databases</h3>
             <div class="form-row">

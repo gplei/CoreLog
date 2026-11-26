@@ -17,6 +17,8 @@ const databases = [
 let dataBackupInProgress = false;
 
 const moduleSettingsKey = 'modules.enabled';
+const nightThemes = ['rose-gold', 'sage-gold', 'denim-rose'] as const;
+type NightTheme = typeof nightThemes[number];
 
 const stagingColumnKeys = {
   trade: 'module.trade.stgHeader',
@@ -160,9 +162,11 @@ function readModuleSettings() {
       trade: settings?.trade === true,
       transaction: settings?.transaction === true,
       hayday: settings?.hayday === true,
+      theme: nightThemes.includes(settings?.theme) ? settings.theme as NightTheme : 'rose-gold',
+      useNow: settings?.useNow === true,
     };
   } catch {
-    return { trade: false, transaction: false, hayday: false };
+    return { trade: false, transaction: false, hayday: false, theme: 'rose-gold' as NightTheme, useNow: false };
   }
 }
 
@@ -241,10 +245,22 @@ export function updateModuleSettings(request: Request, response: Response) {
   const trade = request.body?.trade;
   const transaction = request.body?.transaction;
   const hayday = request.body?.hayday;
+  const theme = request.body?.theme;
+  const useNow = request.body?.useNow;
   if (typeof trade !== 'boolean' || typeof transaction !== 'boolean' || typeof hayday !== 'boolean') {
     response.status(400).json({ error: 'Trade, transaction, and Hay Day must be boolean values.' });
     return;
   }
+  if (theme !== undefined && !nightThemes.includes(theme)) {
+    response.status(400).json({ error: 'Unknown night theme.' });
+    return;
+  }
+  if (useNow !== undefined && typeof useNow !== 'boolean') {
+    response.status(400).json({ error: 'Use theme now must be a boolean.' });
+    return;
+  }
+  const selectedTheme = theme ?? readModuleSettings().theme;
+  const selectedUseNow = useNow ?? readModuleSettings().useNow;
 
   const update = db.transaction(() => {
     const statement = db.prepare(`
@@ -252,7 +268,7 @@ export function updateModuleSettings(request: Request, response: Response) {
       values (?, ?)
       on conflict(setting_key) do update set setting_value = excluded.setting_value
     `);
-    statement.run(moduleSettingsKey, JSON.stringify({ trade, transaction, hayday }));
+    statement.run(moduleSettingsKey, JSON.stringify({ trade, transaction, hayday, theme: selectedTheme, useNow: selectedUseNow }));
   });
   update();
   response.json(readModuleSettings());

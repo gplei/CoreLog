@@ -8,6 +8,9 @@ const state = {
 };
 
 const elements = {
+  theme: document.querySelector('#themeSelect'),
+  themeUseNow: document.querySelector('#themeUseNow'),
+  themeStatus: document.querySelector('#themeStatus'),
   choose: document.querySelector('#btnChooseBackupPath'),
   backupData: document.querySelector('#btnBackupData'),
   backup: document.querySelector('#btnBackupDatabases'),
@@ -29,6 +32,26 @@ const elements = {
   haydayIconSeedStatus: document.querySelector('#haydayIconSeedStatus'),
   haydayIconSeedFailures: document.querySelector('#haydayIconSeedFailures'),
 };
+
+const themeNames = ['rose-gold', 'sage-gold', 'denim-rose'];
+
+function applyThemeSelection(theme) {
+  const selectedTheme = themeNames.includes(theme) ? theme : 'rose-gold';
+  document.documentElement.dataset.theme = selectedTheme;
+  themeNames.forEach((name) => document.documentElement.classList.toggle(`theme-${name}`, name === selectedTheme));
+}
+
+function clearThemeRuntimeStyles() {
+  document.querySelectorAll('.calendar-card, .calendar-links-card, .entry-card, #quick-link-group, .calendar-heading select, .qlink-tooltip, .calendar-card .day-cell').forEach((element) => {
+    ['background', 'border-color', 'box-shadow'].forEach((property) => element.style.removeProperty(property));
+  });
+}
+
+function syncToolThemePreview(useNow) {
+  clearThemeRuntimeStyles();
+  document.documentElement.classList.toggle('theme-preview', useNow === true);
+  window.corelogUpdateTimeTheme?.();
+}
 
 function setDataBackupStatus(message, isError = false) {
   elements.dataBackupStatus.textContent = message;
@@ -94,12 +117,20 @@ async function loadModuleSettings() {
   elements.enableTrade.checked = settings.trade;
   elements.enableTransaction.checked = settings.transaction;
   elements.enableHayday.checked = settings.hayday;
+  elements.theme.value = settings.theme || 'rose-gold';
+  elements.themeUseNow.checked = settings.useNow === true;
+  syncToolThemePreview(elements.themeUseNow.checked);
+  applyThemeSelection(elements.theme.value);
+  window.corelogApplyTheme?.(elements.theme.value);
+  window.dispatchEvent(new CustomEvent('corelog:theme-changed', { detail: { theme: elements.theme.value } }));
 }
 
 async function saveModuleSettings() {
   elements.enableTrade.disabled = true;
   elements.enableTransaction.disabled = true;
   elements.enableHayday.disabled = true;
+  elements.theme.disabled = true;
+  elements.themeUseNow.disabled = true;
   setModuleSettingsStatus('Saving...');
   try {
     const response = await fetch('/api/tool/module-settings', {
@@ -109,11 +140,14 @@ async function saveModuleSettings() {
         trade: elements.enableTrade.checked,
         transaction: elements.enableTransaction.checked,
         hayday: elements.enableHayday.checked,
+        theme: elements.theme.value,
+        useNow: elements.themeUseNow.checked,
       }),
     });
     const settings = await response.json();
     if (!response.ok) throw new Error(settings.error || 'Unable to save module settings.');
     setModuleSettingsStatus('Saved. Refresh other pages to update their tabs.');
+    elements.themeStatus.textContent = 'Theme saved in app settings.';
     window.dispatchEvent(new CustomEvent('corelog:module-settings-changed', { detail: settings }));
   } catch (error) {
     setModuleSettingsStatus(error instanceof Error ? error.message : String(error), true);
@@ -121,6 +155,8 @@ async function saveModuleSettings() {
     elements.enableTrade.disabled = false;
     elements.enableTransaction.disabled = false;
     elements.enableHayday.disabled = false;
+    elements.theme.disabled = false;
+    elements.themeUseNow.disabled = false;
   }
 }
 
@@ -391,6 +427,19 @@ elements.table?.addEventListener('change', () => loadTable(elements.table.value)
 elements.enableTrade?.addEventListener('change', () => saveModuleSettings());
 elements.enableTransaction?.addEventListener('change', () => saveModuleSettings());
 elements.enableHayday?.addEventListener('change', () => saveModuleSettings());
+elements.theme?.addEventListener('change', () => {
+  const theme = elements.theme.value;
+  clearThemeRuntimeStyles();
+  applyThemeSelection(theme);
+  window.corelogApplyTheme?.(theme);
+  localStorage.setItem('corelog-theme', theme);
+  window.dispatchEvent(new CustomEvent('corelog:theme-changed', { detail: { theme } }));
+  saveModuleSettings();
+});
+elements.themeUseNow?.addEventListener('change', () => {
+  syncToolThemePreview(elements.themeUseNow.checked);
+  saveModuleSettings();
+});
 elements.seedQuickLinkIcons?.addEventListener('click', () => seedQuickLinkIcons());
 elements.seedHaydayIcons?.addEventListener('click', () => seedHaydayIcons());
 loadDatabases().catch((error) => setStatus(error.message, true));

@@ -58,10 +58,11 @@
               <div class="form-row">
                 <select id="hayday-ingredient" class="module-control" aria-label="Select ingredient product"></select>
                 <input id="hayday-ingredient-amount" class="module-control" type="number" min="1" placeholder="ingredient count">
-                <button id="hayday-ingredient-add" class="module-control" type="button">Add</button>
-                <select id="hayday-ingredient-building" class="module-control" aria-label="Select building for ingredient"></select>
-                <button id="hayday-ingredient-building-save" class="module-control" type="button">Update Building</button>
+                <button id="hayday-ingredient-add" class="module-control" type="button" title="add ingredient to product">Add</button>
+                <button id="hayday-ingredient-calculate" class="module-control" type="button" title="calculate required ingredients">Calculate</button>
               </div>
+              <div id="hayday-ingredient-pending" class="hayday-ingredient-list" aria-label="Ingredients to calculate"></div>
+              <div id="hayday-ingredient-results" class="hayday-ingredient-results" aria-live="polite"></div>
               <span id="hayday-status" class="transaction-staging-status" role="status" aria-live="polite"></span>
             </div>
           </div>

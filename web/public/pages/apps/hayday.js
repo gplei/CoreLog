@@ -17,10 +17,11 @@ const productBuildingSelect = document.querySelector('#hayday-product-building')
 const productCount = document.querySelector('#hayday-product-count');
 const ingredientCount = document.querySelector('#hayday-ingredient-count');
 const ingredientSelect = document.querySelector('#hayday-ingredient');
-const ingredientBuildingSelect = document.querySelector('#hayday-ingredient-building');
 const ingredientList = document.querySelector('#hayday-ingredient-list');
+const ingredientPending = document.querySelector('#hayday-ingredient-pending');
+const ingredientResults = document.querySelector('#hayday-ingredient-results');
 const status = document.querySelector('#hayday-status');
-const state = { buildings: [], products: [], ingredients: [] };
+const state = { buildings: [], products: [], ingredients: [], pendingIngredients: [] };
 state.accounts = [];
 state.selectedAccounts = new Set();
 const imageDropdowns = new Map();
@@ -41,7 +42,9 @@ function updateProductManagerControls() {
   const hasBuilding = Boolean(selectedBuilding());
   const hasProduct = state.products.some((product) => String(product.id) === productSelect.value);
   const hasIngredient = Boolean(ingredientSelect.value);
-  const hasIngredientBuilding = Boolean(ingredientBuildingSelect.value);
+  const hasCount = Number.parseInt(document.querySelector('#hayday-ingredient-amount')?.value ?? '', 10) > 0;
+  const actionButton = document.querySelector('#hayday-ingredient-add');
+  const calculateButton = document.querySelector('#hayday-ingredient-calculate');
 
   const setEnabled = (selector, enabled) => {
     const control = document.querySelector(selector);
@@ -56,8 +59,17 @@ function updateProductManagerControls() {
   setEnabled('#hayday-building-delete', hasBuilding);
   setEnabled('#hayday-product-save', hasProduct);
   setEnabled('#hayday-product-delete', hasProduct);
-  setEnabled('#hayday-ingredient-add', hasProduct && hasIngredient);
-  setEnabled('#hayday-ingredient-building-save', hasProduct && hasIngredient && hasIngredientBuilding);
+
+  if (actionButton) {
+    actionButton.textContent = 'Add';
+    actionButton.title = hasProduct ? 'add ingredient to product' : 'add ingredient to calculation';
+    actionButton.disabled = false;
+    actionButton.setAttribute('aria-disabled', 'false');
+  }
+  if (calculateButton) {
+    calculateButton.disabled = state.pendingIngredients.length === 0;
+    calculateButton.setAttribute('aria-disabled', String(calculateButton.disabled));
+  }
 }
 
 function renderAccounts() {
@@ -199,6 +211,21 @@ function refreshImageDropdown(select, rows, placeholder, kind, label) {
   const renderOptions = () => {
     const query = dropdown.searchInput?.value.trim().toLowerCase() ?? '';
     dropdown.menu.querySelectorAll('.hayday-image-dropdown-option').forEach((option) => option.remove());
+
+    const placeholderOption = document.createElement('button');
+    placeholderOption.type = 'button';
+    placeholderOption.className = 'hayday-image-dropdown-option hayday-image-dropdown-placeholder';
+    placeholderOption.textContent = placeholder;
+    placeholderOption.addEventListener('click', () => {
+      select.value = '';
+      dropdown.text.textContent = placeholder;
+      dropdown.preview.src = '';
+      dropdown.preview.classList.add('hidden');
+      select.dispatchEvent(new Event('change'));
+      dropdown.menu.classList.add('hidden');
+    });
+    dropdown.menu.appendChild(placeholderOption);
+
     rows.filter((row) => !query || label(row).toLowerCase().includes(query)).forEach((row) => {
     const option = document.createElement('button');
     option.type = 'button'; option.className = 'hayday-image-dropdown-option';
@@ -229,10 +256,9 @@ function renderBuildings() {
   const type = buildingTypeSelect.value ? buildingTypeSelect.selectedOptions[0]?.textContent : '';
   const buildings = state.buildings.filter((building) => !type || building.type === type).sort((a, b) => a.name.localeCompare(b.name));
   buildingCount.textContent = `${buildings.length} building${buildings.length === 1 ? '' : 's'}`;
-  fillSelect(buildingSelect, buildings, '--Select a Building--', (building) => building.name);
+  fillSelect(buildingSelect, buildings, '-- Select a building --', (building) => building.name);
   if (buildings.some((building) => String(building.id) === selectedBuildingId)) buildingSelect.value = selectedBuildingId;
-  refreshImageDropdown(buildingSelect, buildings, '--Select a Building--', 'buildings', (building) => building.name);
-  fillSelect(ingredientBuildingSelect, state.buildings, '--Building name--', (building) => building.name);
+  refreshImageDropdown(buildingSelect, buildings, '-- Select a building --', 'buildings', (building) => building.name);
   fillNamedSelect(buildingEditTypeSelect, [...new Set(state.buildings.map((building) => building.type))].sort(), '--Building type--');
   populateBuildingFields();
   renderProducts();
@@ -251,9 +277,9 @@ function renderProducts() {
   const selectedProductId = productSelect.value;
   const building = selectedBuilding();
   const products = state.products.filter((product) => !building || product.building_id === building.id).sort((a, b) => a.name.localeCompare(b.name));
-  fillSelect(productSelect, products, '--Select a Product--', (product) => product.name);
+  fillSelect(productSelect, products, '-- Select a product --', (product) => product.name);
   if (products.some((product) => String(product.id) === selectedProductId)) productSelect.value = selectedProductId;
-  refreshImageDropdown(productSelect, products, '--Select a Product--', 'products', (product) => product.name);
+  refreshImageDropdown(productSelect, products, '-- Select a product --', 'products', (product) => product.name);
   fillSelect(productBuildingSelect, [...state.buildings].sort((left, right) => left.name.localeCompare(right.name)), '--Building for product--', (building) => building.name);
   const selectedProduct = state.products.find((product) => String(product.id) === productSelect.value);
   productBuildingSelect.value = String(selectedProduct?.building_id ?? building?.id ?? '');
@@ -261,8 +287,8 @@ function renderProducts() {
   productCount.textContent = `${products.length} product${products.length === 1 ? '' : 's'}`;
   ingredientCount.textContent = `${state.products.length} ingredient products`;
   const ingredientProducts = [...state.products].sort((a, b) => a.name.localeCompare(b.name));
-  fillSelect(ingredientSelect, ingredientProducts, '--Select a Product and count--', (product) => product.name);
-  refreshImageDropdown(ingredientSelect, ingredientProducts, '--Select a Product and count--', 'products', (product) => product.name);
+  fillSelect(ingredientSelect, ingredientProducts, '-- Select a product and count --', (product) => product.name);
+  refreshImageDropdown(ingredientSelect, ingredientProducts, '-- Select a product and count --', 'products', (product) => product.name);
   renderIngredients();
   setStatus('');
   updateProductManagerControls();
@@ -309,6 +335,40 @@ function renderIngredients() {
   });
 }
 
+function renderPendingIngredients() {
+  ingredientPending.replaceChildren();
+  state.pendingIngredients.forEach((pending, index) => {
+    const product = state.products.find((row) => row.id === pending.productId);
+    const row = document.createElement('div');
+    row.className = 'hayday-ingredient-row';
+    row.dataset.productId = String(pending.productId);
+    const iconPath = imageUrl('products', product);
+    if (iconPath) {
+      const icon = document.createElement('img');
+      icon.className = 'hayday-ingredient-icon';
+      icon.src = iconPath;
+      icon.alt = '';
+      icon.loading = 'lazy';
+      row.appendChild(icon);
+    }
+    const label = document.createElement('span');
+    label.textContent = `${product?.name ?? `Product #${pending.productId}`}(${pending.count})`;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'hayday-delete-button';
+    remove.textContent = '×';
+    remove.title = 'Delete ingredient';
+    remove.setAttribute('aria-label', `Delete ${label.textContent}`);
+    remove.addEventListener('click', () => {
+      state.pendingIngredients.splice(index, 1);
+      renderPendingIngredients();
+      updateProductManagerControls();
+    });
+    row.append(label, remove);
+    ingredientPending.appendChild(row);
+  });
+}
+
 async function deleteIngredient(id) {
   try {
     const response = await fetch(`/api/tool/database/hayday/table/ingredient/${id}`, { method: 'DELETE' });
@@ -322,15 +382,142 @@ async function deleteIngredient(id) {
   }
 }
 
+function aggregateIngredientLayers(rows) {
+  const aggregated = new Map();
+  rows.forEach((item) => {
+    const key = `${item.depth}:${item.productId}`;
+    const existing = aggregated.get(key);
+    if (existing) existing.count += item.count;
+    else aggregated.set(key, { ...item });
+  });
+  return [...aggregated.values()].sort((left, right) => left.depth - right.depth || left.productId - right.productId);
+}
+
+function calculateRequiredIngredientTree(productId, requestedCount) {
+  const rows = [];
+  const walk = (currentProductId, totalCount, depth, visited) => {
+    if (!Number.isInteger(currentProductId) || currentProductId < 1 || !Number.isInteger(totalCount) || totalCount < 1) return;
+    if (visited.has(currentProductId)) return;
+    visited.add(currentProductId);
+    rows.push({ depth, productId: currentProductId, count: totalCount });
+    const ingredientRows = state.ingredients.filter((entry) => entry.product_id === currentProductId);
+    if (!ingredientRows.length) return;
+    ingredientRows.forEach((entry) => { walk(entry.ingredient_id, totalCount * entry.count, depth + 1, new Set(visited)); });
+  };
+  walk(productId, requestedCount, 0, new Set());
+  return aggregateIngredientLayers(rows);
+}
+
+function renderIngredientTreeNode(productId, count, container, visited) {
+  if (!Number.isInteger(productId) || productId < 1 || !Number.isInteger(count) || count < 1 || visited.has(productId)) return;
+  const product = state.products.find((entry) => entry.id === productId);
+  const row = document.createElement('div');
+  row.className = 'hayday-ingredient-row';
+  const iconPath = imageUrl('products', product);
+  if (iconPath) {
+    const icon = document.createElement('img');
+    icon.className = 'hayday-ingredient-icon';
+    icon.src = iconPath;
+    icon.alt = '';
+    icon.loading = 'lazy';
+    row.appendChild(icon);
+  }
+  const label = document.createElement('span');
+  label.textContent = `${product?.name ?? `Product #${productId}`}(${count})`;
+  row.appendChild(label);
+  container.appendChild(row);
+
+  const ingredients = state.ingredients.filter((entry) => entry.product_id === productId);
+  if (!ingredients.length) return;
+  const children = document.createElement('div');
+  children.className = 'hayday-ingredient-tree-children';
+  const nextVisited = new Set(visited).add(productId);
+  ingredients.forEach((ingredient) => renderIngredientTreeNode(ingredient.ingredient_id, count * ingredient.count, children, nextVisited));
+  container.appendChild(children);
+}
+
+function summarizeRadicalIngredients() {
+  const totals = new Map();
+  const rootProductIds = new Set(state.pendingIngredients.map((pending) => pending.productId));
+  const walk = (productId, count, visited) => {
+    if (visited.has(productId)) return;
+    const ingredients = state.ingredients.filter((entry) => entry.product_id === productId);
+    if (!ingredients.length) {
+      if (!rootProductIds.has(productId)) totals.set(productId, (totals.get(productId) ?? 0) + count);
+      return;
+    }
+    const nextVisited = new Set(visited).add(productId);
+    ingredients.forEach((ingredient) => walk(ingredient.ingredient_id, count * ingredient.count, nextVisited));
+  };
+  state.pendingIngredients.forEach((pending) => walk(pending.productId, pending.count, new Set()));
+  return [...totals.entries()].sort(([left], [right]) => left - right).map(([productId, count]) => {
+    const product = state.products.find((entry) => entry.id === productId);
+    return `${product?.name ?? `Product #${productId}`}(${count})`;
+  });
+}
+
+function pendingIngredientRoots() {
+  const roots = new Map();
+  state.pendingIngredients.forEach((pending) => roots.set(pending.productId, (roots.get(pending.productId) ?? 0) + pending.count));
+  return [...roots.entries()].map(([productId, count]) => ({ productId, count }));
+}
+
+function renderIngredientRequirements() {
+  ingredientResults.replaceChildren();
+  ingredientPending.querySelectorAll('.hayday-ingredient-tree-children').forEach((children) => children.remove());
+  const roots = pendingIngredientRoots();
+  if (!roots.length) {
+    ingredientResults.textContent = 'No required ingredients.';
+    return;
+  }
+
+  // The pending ingredient rows are already the tree roots. Add each root's
+  // children beneath that existing node instead of rendering the root again.
+  roots.forEach((root) => {
+    const rootRow = [...ingredientPending.querySelectorAll('[data-product-id]')]
+      .find((row) => row.dataset.productId === String(root.productId));
+    if (!rootRow) return;
+    const ingredients = state.ingredients.filter((entry) => entry.product_id === root.productId);
+    if (!ingredients.length) return;
+    const children = document.createElement('div');
+    children.className = 'hayday-ingredient-tree-children';
+    const visited = new Set([root.productId]);
+    ingredients.forEach((ingredient) => renderIngredientTreeNode(ingredient.ingredient_id, root.count * ingredient.count, children, visited));
+    rootRow.after(children);
+  });
+
+  const tree = document.createElement('div');
+  tree.className = 'hayday-ingredient-tree';
+  const radicalIngredients = summarizeRadicalIngredients();
+  if (radicalIngredients.length) {
+    const summary = document.createElement('div');
+    summary.className = 'hayday-ingredient-row hayday-ingredient-summary';
+    summary.textContent = `Radical ingredients: ${radicalIngredients.join(', ')}`;
+    tree.appendChild(summary);
+  }
+  ingredientResults.appendChild(tree);
+}
+
 async function addIngredient() {
   const productId = Number(productSelect.value);
   const ingredientId = Number(ingredientSelect.value);
   const countInput = document.querySelector('#hayday-ingredient-amount');
   const count = Number(countInput.value);
-  if (!productId || !ingredientId || !Number.isInteger(count) || count < 1) {
-    setStatus('Select a product, ingredient, and positive count.', true);
+
+  if (!ingredientId || !Number.isInteger(count) || count < 1) {
+    setStatus('Select an ingredient and a positive count.', true);
     return;
   }
+
+  if (!productId) {
+    state.pendingIngredients.push({ productId: ingredientId, count });
+    renderPendingIngredients();
+    countInput.value = '';
+    updateProductManagerControls();
+    setStatus('Ingredient added to calculation.');
+    return;
+  }
+
   try {
     const response = await fetch('/api/tool/hayday/ingredient', {
       method: 'POST',
@@ -347,6 +534,11 @@ async function addIngredient() {
   } catch (error) {
     setStatus(error instanceof Error ? error.message : String(error), true);
   }
+}
+
+function calculateIngredients() {
+  renderIngredientRequirements();
+  setStatus('Ingredient requirements calculated.');
 }
 
 async function saveHaydayRecord(entity) {
@@ -567,8 +759,9 @@ productSelect.addEventListener('change', () => {
 });
 ingredientSelect.addEventListener('change', updateProductManagerControls);
 productBuildingSelect.addEventListener('change', updateProductManagerControls);
-ingredientBuildingSelect.addEventListener('change', updateProductManagerControls);
+document.querySelector('#hayday-ingredient-amount').addEventListener('input', updateProductManagerControls);
 document.querySelector('#hayday-ingredient-add').addEventListener('click', () => void addIngredient());
+document.querySelector('#hayday-ingredient-calculate').addEventListener('click', calculateIngredients);
 document.querySelector('#hayday-building-save').addEventListener('click', () => void saveHaydayRecord('building').catch((error) => setStatus(error.message, true)));
 document.querySelector('#hayday-building-delete').addEventListener('click', () => void deleteHaydayRecord('building').catch((error) => setStatus(error.message, true)));
 document.querySelector('#hayday-product-save').addEventListener('click', () => void saveHaydayRecord('product').catch((error) => setStatus(error.message, true)));

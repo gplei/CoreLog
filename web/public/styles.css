@@ -4,6 +4,7 @@
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: 0;
   scrollbar-gutter: stable;
+  transition: background-color 300ms ease;
 }
 
 * {
@@ -14,6 +15,12 @@ body {
   margin: 0;
   min-width: 320px;
   background: #ffffff;
+  transition: background-color 300ms ease;
+}
+
+html.night-time,
+html.night-time body {
+  background: #0f172a;
 }
 
 button,
@@ -509,6 +516,10 @@ body.is-resizing-table-column {
   background: #eef6ff;
 }
 
+.hayday-image-dropdown-placeholder {
+  color: #64748b;
+}
+
 .hayday-ingredient-list {
   display: grid;
   gap: 1px;
@@ -526,6 +537,20 @@ body.is-resizing-table-column {
   border-radius: 8px;
   color: #536172;
   font-size: 11px;
+}
+
+.hayday-ingredient-tree {
+  display: grid;
+  gap: 4px;
+  max-width: 420px;
+}
+
+.hayday-ingredient-tree-children {
+  display: grid;
+  gap: 2px;
+  margin-left: 22px;
+  padding-left: 8px;
+  border-left: 1px solid #cbd5e1;
 }
 
 .hayday-ingredient-icon {
@@ -2934,6 +2959,125 @@ h1 {
   transition: box-shadow 160ms ease, transform 160ms ease;
 }
 
+.night-time .entry-card {
+  border-color: #46576b;
+  background: #27384d;
+  box-shadow: 0 1px 3px rgb(2 6 23 / 30%);
+}
+
+.night-time .entry-card .entry-date,
+.night-time .entry-card .muted {
+  color: #94a3b8;
+}
+
+.night-time .entry-card .entry-text {
+  color: #e2e8f0;
+}
+
+.night-time .entry-card .tag,
+.night-time .entry-card .chip {
+  border-color: #64748b;
+  background: #46576b;
+  color: #e2e8f0;
+}
+
+.night-time .calendar-card,
+.night-time .calendar-links-card {
+  border-color: #64748b;
+  background: #3b4b5f;
+  box-shadow: 0 1px 3px rgb(2 6 23 / 30%);
+}
+
+.night-time .calendar-links-heading .link-button,
+.night-time .quick-links-title,
+.night-time .calendar-foot,
+.night-time .weekday-row,
+.night-time .account-group-heading {
+  color: #cbd5e1;
+}
+
+.night-time .account-group-rule,
+.night-time .account-separator {
+  background: #64748b;
+}
+
+.night-time #quick-link-group,
+.night-time .calendar-heading select,
+.night-time .day-cell {
+  border-color: #64748b;
+  background: #526275;
+  color: #e2e8f0;
+}
+
+.night-time .day-cell.selected {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.night-time .day-cell.today {
+  box-shadow: 0 0 0 2px #cbd5e1, 0 0 0 4px #3b4b5f;
+}
+
+.night-time .calendar-card .day-cell,
+.night-time .calendar-card .entry-date-link {
+  color: #ffffff !important;
+}
+
+.night-time .calendar-card .day-cell.selected {
+  border: 1px solid #b8cee8;
+  background: linear-gradient(180deg, #7898be 0%, #5e7fa7 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    0 3px 0 #405b79,
+    0 6px 10px rgb(2 6 23 / 30%);
+  transform: translateY(-1px);
+}
+
+.night-time .calendar-card .day-cell.has-entry:not(.selected) {
+  border: 1px solid #64748b;
+  background: linear-gradient(180deg, #607286 0%, #526275 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 2px 0 #3f4d5f,
+    0 4px 7px rgb(2 6 23 / 22%);
+  transform: translateY(-1px);
+}
+
+.night-time .calendar-card .day-cell:not(.has-entry):not(.selected) {
+  border: 0;
+  background: transparent !important;
+  box-shadow: none;
+  transform: none;
+}
+
+.night-time .calendar-card .day-cell.today.has-entry:not(.selected) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 2px 0 #3f4d5f,
+    0 4px 7px rgb(2 6 23 / 22%),
+    0 0 0 2px #cbd5e1;
+}
+
+.night-time .calendar-card .day-cell.today {
+  color: #f87171 !important;
+}
+
+.night-time .account-link,
+.night-time .account-link.text-link,
+.night-time .qlink-tooltip-name {
+  color: #e2e8f0;
+}
+
+.night-time .qlink-tooltip {
+  border-color: #64748b;
+  background: #526275;
+  color: #e2e8f0;
+}
+
+.night-time .qlink-tooltip-tip {
+  color: #cbd5e1;
+}
+
 .entry-date-row {
   display: inline-flex;
   align-items: center;
@@ -3676,6 +3820,192 @@ button.chip {
 
 .mobile-only {
   display: none;
+}
+
+html.night-time {
+  --night-page-bg: #332f2a;
+  --night-font-color: #ffffff;
+  --night-entry-bg: #27384d;
+  --night-panel-bg: #3b4b5f;
+  --night-control-bg: #526275;
+  --night-border: #64748b;
+  --night-highlight-start: #607286;
+  --night-highlight-end: #526275;
+  --night-highlight-edge: #3f4d5f;
+  --night-selected-start: #7898be;
+  --night-selected-end: #5e7fa7;
+  --night-selected-edge: #405b79;
+}
+
+html.theme-rose-gold.night-time {
+  --night-page-bg: #332f2a;
+  --night-entry-bg: #3a2933;
+  --night-panel-bg: #4a3740;
+  --night-control-bg: #654e59;
+  --night-border: #92727e;
+  --night-highlight-start: #a77886;
+  --night-highlight-end: #8c6370;
+  --night-highlight-edge: #5a3e48;
+  --night-selected-start: #c48695;
+  --night-selected-end: #a96878;
+  --night-selected-edge: #754752;
+}
+
+html.theme-sage-gold.night-time {
+  --night-page-bg: #30332d;
+  --night-entry-bg: #2e3a32;
+  --night-panel-bg: #3c4b40;
+  --night-control-bg: #5a6b5e;
+  --night-border: #829386;
+  --night-highlight-start: #718875;
+  --night-highlight-end: #5d735f;
+  --night-highlight-edge: #435448;
+  --night-selected-start: #b5c58c;
+  --night-selected-end: #8ea874;
+  --night-selected-edge: #657c54;
+}
+
+html.theme-denim-rose.night-time {
+  --night-page-bg: #2b3138;
+  --night-entry-bg: #27384d;
+  --night-panel-bg: #3b4b5f;
+  --night-control-bg: #526275;
+  --night-border: #74879a;
+  --night-highlight-start: #6f8298;
+  --night-highlight-end: #5d7188;
+  --night-highlight-edge: #3f4d5f;
+  --night-selected-start: #b28a9b;
+  --night-selected-end: #956d81;
+  --night-selected-edge: #604756;
+}
+
+html.night-time,
+html.night-time body {
+  background: var(--night-page-bg);
+  color: var(--night-font-color);
+}
+
+.night-time .entry-card {
+  border-color: var(--night-border);
+  background: var(--night-entry-bg);
+}
+
+.night-time .entry-card .tag,
+.night-time .entry-card .chip,
+.night-time #quick-link-group,
+.night-time .calendar-heading select,
+.night-time .qlink-tooltip {
+  border-color: var(--night-border);
+  background: var(--night-control-bg);
+}
+
+.night-time .calendar-card,
+.night-time .calendar-links-card {
+  border-color: var(--night-border);
+  background: var(--night-panel-bg);
+}
+
+.night-time .calendar-card .day-cell.selected {
+  border-color: var(--night-border);
+  background: linear-gradient(180deg, var(--night-selected-start), var(--night-selected-end));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    0 3px 0 var(--night-selected-edge),
+    0 6px 10px rgb(2 6 23 / 30%);
+}
+
+.night-time .calendar-card .day-cell.has-entry:not(.selected) {
+  border-color: var(--night-border);
+  background: linear-gradient(180deg, var(--night-highlight-start), var(--night-highlight-end));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 2px 0 var(--night-highlight-edge),
+    0 4px 7px rgb(2 6 23 / 22%);
+}
+
+.night-time .calendar-card .day-cell:not(.has-entry):not(.selected) {
+  border-color: transparent;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+/* The Tool tab keeps a live preview of the selected night palette. */
+html.theme-preview,
+html.theme-preview body {
+  background: var(--night-page-bg);
+}
+
+.theme-preview .calendar-card,
+.theme-preview .calendar-links-card {
+  border-color: var(--night-border);
+  background: var(--night-panel-bg);
+}
+
+.theme-preview #quick-link-group,
+.theme-preview .calendar-heading select,
+.theme-preview .qlink-tooltip {
+  border-color: var(--night-border);
+  background: var(--night-control-bg);
+}
+
+/* Shared panel surfaces use the same theme variables across every module. */
+.night-time :is(
+  .module-settings-panel,
+  .trade-panel,
+  .transaction-manage-panel,
+  .module-workbench-panel,
+  .module-section,
+  .calendar-card,
+  .calendar-links-card,
+  .landing-hero,
+  .landing-card,
+  .landing-metric
+),
+.theme-preview :is(
+  .module-settings-panel,
+  .trade-panel,
+  .transaction-manage-panel,
+  .module-workbench-panel,
+  .module-section,
+  .calendar-card,
+  .calendar-links-card,
+  .landing-hero,
+  .landing-card,
+  .landing-metric
+) {
+  border-color: var(--night-border);
+  background: var(--night-panel-bg) !important;
+  color: var(--night-font-color);
+}
+
+.night-time :is(.module-settings-panel, .trade-panel, .transaction-manage-panel, .module-workbench-panel, .module-section, .calendar-card, .calendar-links-card, .landing-hero, .landing-card, .landing-metric) :is(h1, h2, h3, h4, p, label, span, .muted, .status, .module-panel-label, .module-setting-option, .hayday-manager-label),
+.theme-preview :is(.module-settings-panel, .trade-panel, .transaction-manage-panel, .module-workbench-panel, .module-section, .calendar-card, .calendar-links-card, .landing-hero, .landing-card, .landing-metric) :is(h1, h2, h3, h4, p, label, span, .muted, .status, .module-panel-label, .module-setting-option, .hayday-manager-label) {
+  color: var(--night-font-color);
+}
+
+.night-time .table-container .data-table,
+.theme-preview .table-container .data-table {
+  color: #111827;
+}
+
+.night-time .table-container .data-table thead th,
+.theme-preview .table-container .data-table thead th {
+  color: #1e293b !important;
+}
+
+.night-time .table-container .data-table tbody td,
+.theme-preview .table-container .data-table tbody td {
+  color: #111827;
+}
+
+.night-time .table-container .data-table tbody td *,
+.theme-preview .table-container .data-table tbody td * {
+  color: #111827 !important;
+}
+
+.night-time .table-container .data-table thead th *,
+.theme-preview .table-container .data-table thead th * {
+  color: #1e293b !important;
 }
 
 @media (max-width: 900px) {
